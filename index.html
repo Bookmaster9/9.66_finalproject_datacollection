@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Password Modification Study</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        background: #f5f5f5;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 700px;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 28px;
+      }
+
+      h2 {
+        color: #34495e;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        font-size: 22px;
+      }
+
+      h3 {
+        color: #555;
+        margin-bottom: 15px;
+        font-size: 18px;
+      }
+
+      p,
+      li {
+        margin-bottom: 12px;
+        font-size: 16px;
+      }
+
+      ul {
+        margin-left: 20px;
+        margin-bottom: 20px;
+      }
+
+      .consent-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 5px;
+        margin: 20px 0;
+        border-left: 4px solid #3498db;
+      }
+
+      .password-display {
+        background: #ecf0f1;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px 0;
+        font-family: "Courier New", monospace;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .password-input {
+        width: 100%;
+        padding: 12px;
+        font-size: 16px;
+        font-family: "Courier New", monospace;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        margin: 15px 0;
+        transition: border-color 0.3s;
+      }
+
+      .password-input:focus {
+        outline: none;
+        border-color: #3498db;
+      }
+
+      .error-message {
+        color: #e74c3c;
+        background: #fadbd8;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        display: none;
+      }
+
+      .error-message.show {
+        display: block;
+      }
+
+      .warning-message {
+        color: #856404;
+        background: #fff3cd;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        display: none;
+      }
+
+      .warning-message.show {
+        display: block;
+      }
+
+      .timer {
+        font-size: 24px;
+        font-weight: bold;
+        color: #e74c3c;
+        text-align: center;
+        margin: 20px 0;
+        padding: 15px;
+        background: #fee;
+        border-radius: 5px;
+        display: none;
+      }
+
+      .timer.show {
+        display: block;
+      }
+
+      .timer.grace-period {
+        background: #fff3cd;
+        color: #856404;
+      }
+
+      textarea {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        margin: 15px 0;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 80px;
+      }
+
+      textarea:focus {
+        outline: none;
+        border-color: #3498db;
+      }
+
+      button {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+        margin-top: 20px;
+      }
+
+      button:hover {
+        background: #2980b9;
+      }
+
+      button:disabled {
+        background: #95a5a6;
+        cursor: not-allowed;
+      }
+
+      .page {
+        display: none;
+      }
+
+      .page.active {
+        display: block;
+      }
+
+      .progress {
+        background: #ecf0f1;
+        height: 8px;
+        border-radius: 4px;
+        margin: 20px 0;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: #3498db;
+        transition: width 0.3s;
+      }
+
+      .instruction-box {
+        background: #e8f4f8;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 15px 0;
+        border-left: 4px solid #3498db;
+      }
+
+      .completion-message {
+        text-align: center;
+        padding: 40px 0;
+      }
+
+      .completion-message h2 {
+        color: #27ae60;
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Progress Bar -->
+      <div class="progress">
+        <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+      </div>
+
+      <!-- Consent Page -->
+      <div class="page active" id="consentPage">
+        <h1>Password Modification Study</h1>
+
+        <div class="consent-section">
+          <h2>Important Information</h2>
+          <ul>
+            <li>
+              <strong>Do NOT use any of your own passwords</strong> in this
+              study
+            </li>
+            <li>This form is completely <strong>anonymous</strong></li>
+            <li>
+              All data will be deleted after the final project is completed
+            </li>
+            <li>
+              You will be asked to modify 4 different passwords under different
+              conditions
+            </li>
+            <li>
+              Each task will ask you to retype the modified password to ensure
+              memorability
+            </li>
+          </ul>
+        </div>
+
+        <p>
+          This study investigates how people modify passwords when asked to
+          strengthen them. You'll work with sample passwords and modify them
+          according to specific instructions.
+        </p>
+
+        <p><strong>Time commitment:</strong> Approximately 5-10 minutes</p>
+
+        <button onclick="startStudy()">I Understand - Begin Study</button>
+      </div>
+
+      <!-- Task 1: Strengthen password (no cues) -->
+      <div class="page" id="task1Page">
+        <h2>Task 1 of 4</h2>
+        <div class="instruction-box">
+          <p>
+            <strong>Instructions:</strong> Strengthen the following password.
+            You can add, remove, or change characters as you see fit.
+          </p>
+          <p>
+            <em
+              >Note: You will be asked to retype your modified password on the
+              next page.</em
+            >
+          </p>
+        </div>
+        <div class="password-display" id="task1Original"></div>
+        <label for="task1Input">Modified Password:</label>
+        <input
+          type="text"
+          class="password-input"
+          id="task1Input"
+          placeholder="Enter your modified password"
+        />
+        <button onclick="submitTask(1)">Continue</button>
+      </div>
+
+      <!-- Retype 1 -->
+      <div class="page" id="retype1Page">
+        <h2>Task 1 - Verification</h2>
+        <p>
+          Please retype the password you just created
+          <strong>without copying and pasting</strong>.
+        </p>
+        <label for="retype1Input">Retype Password:</label>
+        <input
+          type="text"
+          class="password-input"
+          id="retype1Input"
+          placeholder="Retype your password"
+        />
+        <div class="warning-message" id="retype1Warning">
+          The passwords do not match. You can retry or submit anyway.
+        </div>
+        <label for="strategy1Input"
+          >Optional: Describe your strategy for modifying the password</label
+        >
+        <textarea
+          id="strategy1Input"
+          placeholder="What approach did you take? Why did you make the changes you made?"
+        ></textarea>
+        <button onclick="verifyRetype(1)">Continue</button>
+      </div>
+
+      <!-- Task 2: Strengthen password (deletion only) -->
+      <div class="page" id="task2Page">
+        <h2>Task 2 of 4</h2>
+        <div class="instruction-box">
+          <p>
+            <strong>Instructions:</strong> Strengthen the following password by
+            <strong>removing characters only</strong>. You cannot add any new
+            characters.
+          </p>
+          <p>
+            <em
+              >Note: You will be asked to retype your modified password on the
+              next page.</em
+            >
+          </p>
+        </div>
+        <div class="password-display" id="task2Original"></div>
+        <label for="task2Input">Modified Password:</label>
+        <input
+          type="text"
+          class="password-input"
+          id="task2Input"
+          placeholder="Remove characters to strengthen"
+        />
+        <div class="error-message" id="task2Error">
+          You can only remove characters in this task!
+        </div>
+        <button onclick="submitTask(2)">Continue</button>
+      </div>
+
+      <!-- Retype 2 -->
+      <div class="page" id="retype2Page">
+        <h2>Task 2 - Verification</h2>
+        <p>
+          Please retype the password you just created
+          <strong>without copying and pasting</strong>.
+        </p>
+        <label for="retype2Input">Retype Password:</label>
+        <input
+          type="text"
+          class="password-input"
+          id="retype2Input"
+          placeholder="Retype your password"
+        />
+        <div class="warning-message" id="retype2Warning">
+          The passwords do not match. You can retry or submit anyway.
+        </div>
+        <label for="strategy2Input"
+          >Optional: Describe your strategy for modifying the password</label
+        >
+        <textarea
+          id="strategy2Input"
+          placeholder="What approach did you take? Why did you make the changes you made?"
+        ></textarea>
+        <button onclick="verifyRetype(2)">Continue</button>
+      </div>
+
+      <!-- Task 3: Harder to crack -->
+      <div class="page" id="task3Page">
+        <h2>Task 3 of 4</h2>
+        <div class="instruction-box">
+          <p>
+            <strong>Instructions:</strong> Make the following password harder
+            for a password cracker to guess. You can add, remove, or change
+            characters.
+          </p>
+          <p>
+            <em
+              >Note: You will be asked to retype your modified password on the
+              next page.</em
+            >
+          </p>
+        </div>
+        <div class="password-display" id="task3Original"></div>
+        <label for="task3Input">Modified Password:</label>
+        <input
+          type="text"
+          class="password-input"
+          id="task3Input"
+          placeholder="Enter your modified password"
+        />
+        <button onclick="submitTask(3)">Continue</button>
+      </div>
+
+      <!-- Retype 3 -->
+      <div class="page" id="retype3Page">
+        <h2>Task 3 - Verification</h2>
+        <p>
+          Please retype the password you just created
+          <strong>without copying and pasting</strong>.
+        </p>
+        <label for="retype3Input">Retype Password:</label>
+        <input
+          type="text"
+          class="password-input"
+          id="retype3Input"
+          placeholder="Retype your password"
+        />
+        <div class="warning-message" id="retype3Warning">
+          The passwords do not match. You can retry or submit anyway.
+        </div>
+        <label for="strategy3Input"
+          >Optional: Describe your strategy for modifying the password</label
+        >
+        <textarea
+          id="strategy3Input"
+          placeholder="What approach did you take? Why did you make the changes you made?"
+        ></textarea>
+        <button onclick="verifyRetype(3)">Continue</button>
+      </div>
+
+      <!-- Task 4: Harder to crack with time limit -->
+      <div class="page" id="task4Page">
+        <h2>Task 4 of 4</h2>
+        <div class="instruction-box">
+          <p>
+            <strong>Instructions:</strong> Make the following password harder
+            for a password cracker to guess. You have
+            <strong>15 seconds</strong> to make your changes. You can add,
+            remove, or change characters.
+          </p>
+          <p>
+            <em
+              >Note: You will be asked to retype your modified password on the
+              next page.</em
+            >
+          </p>
+          <p>
+            <em>The timer will start automatically when this page loads.</em>
+          </p>
+        </div>
+        <div class="timer" id="timer"></div>
+        <div class="password-display" id="task4Original"></div>
+        <label for="task4Input">Modified Password:</label>
+        <input
+          type="text"
+          class="password-input"
+          id="task4Input"
+          placeholder="Enter your modified password"
+        />
+        <button id="task4SubmitBtn" onclick="submitTask(4)">Continue</button>
+      </div>
+
+      <!-- Retype 4 -->
+      <div class="page" id="retype4Page">
+        <h2>Task 4 - Verification</h2>
+        <p>
+          Please retype the password you just created
+          <strong>without copying and pasting</strong>.
+        </p>
+        <label for="retype4Input">Retype Password:</label>
+        <input
+          type="text"
+          class="password-input"
+          id="retype4Input"
+          placeholder="Retype your password"
+        />
+        <div class="warning-message" id="retype4Warning">
+          The passwords do not match. You can retry or submit anyway.
+        </div>
+        <label for="strategy4Input"
+          >Optional: Describe your strategy for modifying the password</label
+        >
+        <textarea
+          id="strategy4Input"
+          placeholder="What approach did you take? Why did you make the changes you made?"
+        ></textarea>
+        <button onclick="verifyRetype(4)">Continue</button>
+      </div>
+
+      <!-- Completion Page -->
+      <div class="page" id="completionPage">
+        <div class="completion-message">
+          <h2>Thank You!</h2>
+          <p>
+            Your responses have been recorded. Thank you for participating in
+            this study.
+          </p>
+          <p>You may now close this page.</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Data storage
+      const studyData = {
+        sessionId: Date.now() + "-" + Math.random().toString(36).substr(2, 9),
+        startTime: null,
+        tasks: [],
+      };
+
+      // Password banks
+      const passwordBank12 = ["Password12345", "MITPassword!"];
+      const passwordBank34 = ["iloveyou123456789", "ninepointsixsixzero"];
+
+      // Randomly select passwords for tasks 1&2
+      const selectedPassword12 =
+        passwordBank12[Math.floor(Math.random() * passwordBank12.length)];
+
+      // For tasks 3&4: randomly choose which one goes first, the other goes second
+      const shuffled34 = [...passwordBank34].sort(() => Math.random() - 0.5);
+      const selectedPassword3 = shuffled34[0];
+      const selectedPassword4 = shuffled34[1];
+
+      // Original passwords for each task
+      const originalPasswords = {
+        1: selectedPassword12,
+        2: selectedPassword12,
+        3: selectedPassword3,
+        4: selectedPassword4,
+      };
+
+      let currentTask = 0;
+      let taskStartTime = null;
+      let timerInterval = null;
+      let graceTimerInterval = null;
+
+      function updateProgress() {
+        const progress = (currentTask / 8) * 100; // 8 total steps (4 tasks + 4 retypes)
+        document.getElementById("progressBar").style.width = progress + "%";
+      }
+
+      function showPage(pageId) {
+        document.querySelectorAll(".page").forEach((page) => {
+          page.classList.remove("active");
+        });
+        document.getElementById(pageId).classList.add("active");
+      }
+
+      function startStudy() {
+        studyData.startTime = Date.now();
+
+        // Display the selected passwords
+        document.getElementById("task1Original").textContent =
+          originalPasswords[1];
+        document.getElementById("task2Original").textContent =
+          originalPasswords[2];
+        document.getElementById("task3Original").textContent =
+          originalPasswords[3];
+        document.getElementById("task4Original").textContent =
+          originalPasswords[4];
+
+        showPage("task1Page");
+        currentTask = 1;
+        updateProgress();
+        startTaskTimer();
+      }
+
+      function startTaskTimer() {
+        taskStartTime = Date.now();
+      }
+
+      function getTaskDuration() {
+        return Date.now() - taskStartTime;
+      }
+
+      function submitTask(taskNum) {
+        const input = document.getElementById(`task${taskNum}Input`);
+        const modifiedPassword = input.value.trim();
+
+        if (!modifiedPassword) {
+          alert("Please enter a modified password.");
+          return;
+        }
+
+        // For task 2, check deletion-only constraint
+        if (taskNum === 2) {
+          const original = originalPasswords[2];
+          if (!isSubsetOf(modifiedPassword, original)) {
+            document.getElementById("task2Error").classList.add("show");
+            return;
+          }
+          document.getElementById("task2Error").classList.remove("show");
+        }
+
+        // Store task data
+        const taskData = {
+          taskNumber: taskNum,
+          originalPassword: originalPasswords[taskNum],
+          modifiedPassword: modifiedPassword,
+          timeTaken: getTaskDuration(),
+          timestamp: Date.now(),
+        };
+
+        // Find existing task or add new
+        const existingIndex = studyData.tasks.findIndex(
+          (t) => t.taskNumber === taskNum
+        );
+        if (existingIndex >= 0) {
+          studyData.tasks[existingIndex] = {
+            ...studyData.tasks[existingIndex],
+            ...taskData,
+          };
+        } else {
+          studyData.tasks.push(taskData);
+        }
+
+        // Move to retype page
+        showPage(`retype${taskNum}Page`);
+        currentTask += 0.5;
+        updateProgress();
+        startTaskTimer();
+      }
+
+      function verifyRetype(taskNum) {
+        const retypeInput = document.getElementById(
+          `retype${taskNum}Input`
+        ).value;
+        const strategyInput = document.getElementById(
+          `strategy${taskNum}Input`
+        ).value;
+        const taskData = studyData.tasks.find((t) => t.taskNumber === taskNum);
+
+        const warningElement = document.getElementById(
+          `retype${taskNum}Warning`
+        );
+
+        // Check if passwords match
+        const passwordsMatch = retypeInput === taskData.modifiedPassword;
+
+        if (!passwordsMatch) {
+          // Show warning but don't block submission
+          warningElement.classList.add("show");
+          // Don't return - allow them to continue anyway
+        } else {
+          warningElement.classList.remove("show");
+        }
+
+        // Update task data with retype info
+        taskData.retypeCorrect = passwordsMatch;
+        taskData.retypedPassword = retypeInput;
+        taskData.retypeTime = getTaskDuration();
+        taskData.strategy = strategyInput;
+
+        // Move to next task or completion
+        if (taskNum < 4) {
+          // Clear warning for next time
+          warningElement.classList.remove("show");
+          showPage(`task${taskNum + 1}Page`);
+          currentTask += 0.5;
+          updateProgress();
+          startTaskTimer();
+
+          // Auto-start timer for task 4
+          if (taskNum === 3) {
+            startTimedTask();
+          }
+        } else {
+          submitToGoogleSheets();
+          showPage("completionPage");
+          currentTask = 8;
+          updateProgress();
+        }
+      }
+
+      function isSubsetOf(modified, original) {
+        // Check if modified is a subset of original (only deletions)
+        let origIndex = 0;
+        for (let i = 0; i < modified.length; i++) {
+          while (
+            origIndex < original.length &&
+            original[origIndex] !== modified[i]
+          ) {
+            origIndex++;
+          }
+          if (origIndex >= original.length) {
+            return false;
+          }
+          origIndex++;
+        }
+        return true;
+      }
+
+      // Timer functionality for Task 4
+      function startTimedTask() {
+        document.getElementById("task4Input").focus();
+
+        let timeLeft = 15;
+        const timerDisplay = document.getElementById("timer");
+        timerDisplay.classList.add("show");
+        timerDisplay.textContent = `Time remaining: ${timeLeft} seconds`;
+
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          timerDisplay.textContent = `Time remaining: ${timeLeft} seconds`;
+
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            startGracePeriod();
+          }
+        }, 1000);
+      }
+
+      function startGracePeriod() {
+        const timerDisplay = document.getElementById("timer");
+        timerDisplay.classList.add("grace-period");
+        let graceTime = 5;
+        timerDisplay.textContent = `Final changes: ${graceTime} seconds`;
+
+        document.getElementById("task4SubmitBtn").style.display =
+          "inline-block";
+
+        graceTimerInterval = setInterval(() => {
+          graceTime--;
+          timerDisplay.textContent = `Final changes: ${graceTime} seconds`;
+
+          if (graceTime <= 0) {
+            clearInterval(graceTimerInterval);
+            submitTask(4);
+          }
+        }, 1000);
+      }
+
+      // Google Sheets integration
+      function submitToGoogleSheets() {
+        const SCRIPT_URL =
+          "https://script.google.com/macros/s/AKfycby04PhIv_u1r0Cd5F_Eaq7a1yKE6_nnaSWyIymnNlieL9j6f6eG7DkSIqsLcvhuYHDLoA/exec";
+
+        // Prepare data for submission
+        const submissionData = {
+          sessionId: studyData.sessionId,
+          timestamp: new Date().toISOString(),
+          ...studyData.tasks.reduce((acc, task) => {
+            acc[`task${task.taskNumber}_original`] = task.originalPassword;
+            acc[`task${task.taskNumber}_modified`] = task.modifiedPassword;
+            acc[`task${task.taskNumber}_time`] = task.timeTaken;
+            acc[`task${task.taskNumber}_retyped`] = task.retypedPassword || "";
+            acc[`task${task.taskNumber}_retypeCorrect`] = task.retypeCorrect
+              ? "YES"
+              : "NO";
+            acc[`task${task.taskNumber}_retypeTime`] = task.retypeTime;
+            acc[`task${task.taskNumber}_strategy`] = task.strategy || "";
+            return acc;
+          }, {}),
+        };
+
+        // Send to Google Sheets
+        fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData),
+        }).catch((error) => {
+          console.error("Error submitting data:", error);
+        });
+
+        // Also log to console for debugging
+        console.log("Study data:", submissionData);
+      }
+    </script>
+  </body>
+</html>
